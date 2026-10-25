@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 // Props para recibir los datos del mensaje desde un componente padre
 defineProps({
@@ -12,14 +12,15 @@ defineProps({
         required: true
     },
     timestamp: {
-        type: String,
-        default: 'Ahora'
+        type: Number,
+        default: 0
     },
     isMe: {
         type: Boolean,
         default: false
     }
 })
+
 </script>
 
 <template>
@@ -35,11 +36,11 @@ defineProps({
         <div :class="['message-bubble', isMe ? 'message-bubble-me' : 'message-bubble-other']">
             <div class="message-header">
                 <span class="message-sender">{{ isMe ? 'Tú' : sender }}</span>
-                <span class="message-time">{{ timestamp }}</span>
+                <span class="message-time">{{ new Date(timestamp * 1000).toLocaleString() }}</span>
             </div>
 
             <p class="message-text">
-                {{ message }}
+                {{ message ?? timestamp }}
             </p>
         </div>
 

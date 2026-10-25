@@ -1,9 +1,19 @@
 import { defineStore } from "pinia"
-import { ref } from "vue"
+import { onMounted, ref } from "vue"
+import { pusher } from "../libs/PushbulletApiPusher";
+
+type Message = {
+    id: string;
+    sender: string;
+    text: string;
+    timestamp: number;
+    isMe: boolean;
+    type: 'note' | 'url'
+}
 
 export const useMessagesStore = defineStore('counter', () => {
-    const messages = ref([
-        { id: 1, sender: 'Carlos', text: '¡Hola! ¿Qué tal vas probando Tailwind CSS v4?', timestamp: '10:30 AM', isMe: false },
+    const messages = ref<Message[]>([
+        /*{ id: 1, sender: 'Carlos', text: '¡Hola! ¿Qué tal vas probando Tailwind CSS v4?', timestamp: '10:30 AM', isMe: false },
         { id: 2, sender: 'Tú', text: '¡Hola Carlos! Todo excelente, la sintaxis con el nuevo import global es súper limpia.', timestamp: '10:32 AM', isMe: true },
         { id: 3, sender: 'Carlos', text: 'Me alegra oír eso. ¿Y qué tal funcionan los componentes?', timestamp: '10:33 AM', isMe: false },
         { id: 4, sender: 'Tú', text: 'Genial, combinados con las variables CSS y @apply se adaptan solos al modo oscuro.', timestamp: '10:35 AM', isMe: true },
@@ -52,9 +62,23 @@ export const useMessagesStore = defineStore('counter', () => {
         { id: 47, sender: 'Carlos', text: '👍', timestamp: '11:36 AM', isMe: false },
         { id: 48, sender: 'Tú', text: '🚀', timestamp: '11:37 AM', isMe: true },
         { id: 49, sender: 'Carlos', text: '☕', timestamp: '11:38 AM', isMe: false },
-        { id: 50, sender: 'Tú', text: 'Nos vemos en el almuerzo.', timestamp: '11:40 AM', isMe: true }
+        { id: 50, sender: 'Tú', text: 'Nos vemos en el almuerzo.', timestamp: '11:40 AM', isMe: true }*/
     ])
 
-    const loading = ref(false)
+    const loading = ref(true)
+
+    onMounted(async () => {
+        const data = await pusher.getPushes()
+        const _messages = data.pushes.map((x) => ({
+            id: x.iden,
+            text: x.body,
+            sender: x.sender_name,
+            timestamp: x.created,
+            isMe: true,
+            type: x.type
+        })) as Message[]
+        messages.value = _messages
+        loading.value = false
+    })
     return { messages, loading }
 })

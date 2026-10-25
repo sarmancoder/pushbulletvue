@@ -2,7 +2,9 @@
 import { ref, watch, nextTick } from 'vue'
 import ChatMessage from './ChatMessage.vue'
 import { useMessagesStore } from '../stores/useMessages.ts'
-const { messages, loading } = useMessagesStore()
+import { storeToRefs } from 'pinia'
+const messagesStore = useMessagesStore()
+const { messages, loading } = storeToRefs(messagesStore)
 
 // Referencia para el auto-scroll
 const scrollContainer = ref(null)
