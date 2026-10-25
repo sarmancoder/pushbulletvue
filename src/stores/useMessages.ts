@@ -1,6 +1,6 @@
 import { defineStore } from "pinia"
-import { onMounted, ref } from "vue"
-import { pusher } from "../libs/PushbulletApiPusher";
+import { onMounted, ref, watch } from "vue"
+import PushbulletApiPusher from "../libs/PushbulletApiPusher";
 
 type Message = {
     id: string;
@@ -12,6 +12,7 @@ type Message = {
 }
 
 export const useMessagesStore = defineStore('counter', () => {
+    const appToken = ref('')
     const messages = ref<Message[]>([
         /*{ id: 1, sender: 'Carlos', text: '¡Hola! ¿Qué tal vas probando Tailwind CSS v4?', timestamp: '10:30 AM', isMe: false },
         { id: 2, sender: 'Tú', text: '¡Hola Carlos! Todo excelente, la sintaxis con el nuevo import global es súper limpia.', timestamp: '10:32 AM', isMe: true },
@@ -67,8 +68,10 @@ export const useMessagesStore = defineStore('counter', () => {
 
     const loading = ref(true)
 
-    onMounted(async () => {
-        const data = await pusher.getPushes()
+    watch(appToken, async (val) => {
+        if (!val) return;
+        const data = await PushbulletApiPusher.getInstance({ token: appToken.value }).getPushes()
+        console.log(appToken.value, data)
         const _messages = data.pushes.map((x) => ({
             id: x.iden,
             text: x.body,
@@ -80,5 +83,13 @@ export const useMessagesStore = defineStore('counter', () => {
         messages.value = _messages
         loading.value = false
     })
-    return { messages, loading }
+
+    return { messages, loading, appToken }
+}, {
+    persist: {
+        key: 'pushbullet_secure_session', // Nombre de la clave en el almacenamiento
+        pick: ['appToken'], // Especifica qué variables quieres conservar al recargar
+
+        // storage: localStorage // Por defecto usa localStorage (puedes cambiar a sessionStorage si prefieres que se borre al cerrar la pestaña)
+    }
 })
