@@ -16,6 +16,7 @@ type Message = {
 export const useMessagesStore = defineStore('counter', () => {
     const appToken = ref('')
     const user = ref<User | null>()
+    const socket = ref<ReturnType<typeof listenUpdates>>()
     const messages = ref<Message[]>([
         /*{ id: 1, sender: 'Carlos', text: '¡Hola! ¿Qué tal vas probando Tailwind CSS v4?', timestamp: '10:30 AM', isMe: false },
         { id: 2, sender: 'Tú', text: '¡Hola Carlos! Todo excelente, la sintaxis con el nuevo import global es súper limpia.', timestamp: '10:32 AM', isMe: true },
@@ -86,6 +87,12 @@ export const useMessagesStore = defineStore('counter', () => {
         })) as Message[]).sort((a, b) => a.timestamp - b.timestamp);
         messages.value = _messages
         loading.value = false
+        socket.value = listenUpdates({
+            accessToken: appToken.value,
+            onMessage(message) {
+                console.log('Nueva actualización', message)
+            },
+        })
     })
 
     return { messages, loading, appToken, user }
@@ -97,3 +104,47 @@ export const useMessagesStore = defineStore('counter', () => {
         // storage: localStorage // Por defecto usa localStorage (puedes cambiar a sessionStorage si prefieres que se borre al cerrar la pestaña)
     }
 })
+
+function listenUpdates({ onMessage, accessToken }: {
+    accessToken: string
+    onMessage: (message: any) => void
+}) {
+    const wsUrl = `wss://stream.pushbullet.com/websocket/${accessToken}`;
+
+    // Crear la conexión WebSocket nativa
+    const socket = new WebSocket(wsUrl);
+
+    // Evento: Conexión abierta con éxito
+    socket.addEventListener("open", (event) => {
+        console.log("Conectado a Pushbullet WebSocket correctamente.");
+    });
+
+    // Evento: Mensaje recibido desde Pushbullet
+    socket.addEventListener("message", (event) => {
+        try {
+            console.log(event.type, JSON.stringify(event))
+            onMessage(event)
+        } catch (error) {
+            console.error("Error al parsear el mensaje JSON:", error);
+        }
+    });
+
+    socket.addEventListener('open', (event) => {
+        console.log('Escuchando actualizaciones')
+    })
+
+    // Evento: Error en la conexión
+    socket.addEventListener("error", (event) => {
+        console.error("Error en el WebSocket:", event);
+    });
+
+    // Evento: Conexión cerrada
+    socket.addEventListener("close", (event) => {
+        console.log(`Conexión cerrada. Código: ${event.code}, Razón: ${event.reason}`);
+    });
+    return {
+        close() {
+            socket.close()
+        }
+    }
+}
