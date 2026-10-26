@@ -18,3 +18,14 @@ export type PusherType = {
     awake_app_guids: string[];
     body: string;
 }
+
+export type User = {
+    created: number;
+    email: string;
+    email_normalized: string;
+    iden: string;
+    image_url: string;
+    max_upload_size: number;
+    modified: number;
+    name: string;
+}

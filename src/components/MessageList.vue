@@ -57,7 +57,7 @@ watch(() => messages, () => {
     .messages-container {
         background-color: var(--bg-primary, #f8fafc);
         border: 1px solid var(--border-color, #e2e8f0);
-        @apply pb-40 px-10 pt-10;
+        @apply pb-40 px-10 pt-15;
     }
 
     /* Scrollbar fina */
