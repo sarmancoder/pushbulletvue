@@ -3,7 +3,7 @@ export type PusherType = {
     iden: string;
     created: number;
     modified: number;
-    type: string;
+    type: 'note' | 'link' | 'file';
     dismissed: boolean;
     guid: string;
     direction: string;
@@ -17,6 +17,8 @@ export type PusherType = {
     source_device_iden: string;
     awake_app_guids: string[];
     body: string;
+    url: string;
+    file_url: string;
 }
 
 export type User = {
