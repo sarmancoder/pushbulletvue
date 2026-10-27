@@ -28,7 +28,7 @@ async function sendMessage() {
 
 <template>
     <form @submit.prevent="sendMessage">
-        <div class="fixed bottom-0 left-0 px-5 h-20 right-0 flex flex-col  bg-(--bg-primary)">
+        <div class="fixed bottom-0 left-0 px-5 h-20 right-0 flex flex-col justify-center bg-(--bg-primary)">
             <p v-if="errorMessage" class="font-bold text-red-800">{{ errorMessage }}</p>
             <div class="flex flex-row gap-2 items-center">
                 <input :readonly="unable" placeholder="Escribe aqui tu mensaje" v-model="message" />
