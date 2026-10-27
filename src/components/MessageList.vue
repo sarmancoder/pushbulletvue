@@ -6,14 +6,11 @@ import { storeToRefs } from 'pinia'
 const messagesStore = useMessagesStore()
 const { messages, loading } = storeToRefs(messagesStore)
 
-// Referencia para el auto-scroll
-const scrollContainer = ref(null)
-
 const scrollToBottom = async () => {
     await nextTick()
-    if (scrollContainer.value) {
-        scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight
-    }
+    window.scrollTo({
+        top: document.body.scrollHeight
+    })
 }
 
 // Hacer scroll al montar y cuando cambien los mensajes
@@ -23,7 +20,7 @@ watch(() => messages, () => {
 </script>
 
 <template>
-    <div class="messages-container" ref="scrollContainer">
+    <div class="messages-container">
 
         <!-- Estado de carga -->
         <div v-if="loading" class="messages-loading">

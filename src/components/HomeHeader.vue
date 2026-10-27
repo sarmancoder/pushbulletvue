@@ -12,9 +12,6 @@ function logout() {
     messages.logout()
     router.push('/login')
 }
-function greet() {
-    console.log('Holaaa')
-}
 
 </script>
 
@@ -53,6 +50,6 @@ function greet() {
 @import 'tailwindcss';
 
 .header {
-    @apply fixed top-0 h-15 flex flex-row justify-between items-center bg-(--bg-primary) right-0 left-0 px-4;
+    @apply fixed top-0 h-15 flex flex-row justify-between z-50 items-center bg-(--bg-primary) right-0 left-0 px-4;
 }
 </style>
