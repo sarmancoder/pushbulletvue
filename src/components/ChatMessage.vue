@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 // Props para recibir los datos del mensaje desde un componente padre
 defineProps({
@@ -21,6 +21,10 @@ defineProps({
     }
 })
 
+const isImage = computed(() => message.endsWith('png') || message.endsWith('jpg'))
+const isVideo = computed(() => message.endsWith('mp4'))
+const isUrl = computed(() => message.startsWith('http'))
+
 </script>
 
 <template>
@@ -39,11 +43,15 @@ defineProps({
                 <span class="message-time">{{ new Date(timestamp * 1000).toLocaleString() }}</span>
             </div>
 
-            <p class="message-text">
+            <img v-if="isImage" :src="message" class="max-w-sm" />
+            <video v-else-if="isVideo" :src="message" class="max-w-sm" />
+            <a v-else-if="isUrl" target="_blank" class="text-blue-800" :href="message">
+                {{ message }}
+            </a>
+            <p class="message-text" v-else>
                 {{ message ?? timestamp }}
             </p>
         </div>
-
     </div>
 </template>
 
