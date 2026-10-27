@@ -35,7 +35,7 @@ export default class PushbulletApiPusher extends PushbulletApi {
             headers: {
                 'Content-Type': 'application/json'
             } as any,
-            body: dataToSend as any
+            body: JSON.stringify(dataToSend) as any
         })
         const data = await req.json()
         return data as { push: PusherType[] }

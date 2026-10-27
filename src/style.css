@@ -105,6 +105,19 @@
     @apply font-medium px-4 py-2.5 rounded-xl transition-all duration-200 shadow-sm cursor-pointer border border-transparent;
   }
 
+  input:read-only {
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border-style: dashed;
+    cursor: default;
+  }
+
+  /* Sin anillo de foco cuando es solo lectura */
+  input:read-only:focus {
+    border-color: var(--border-color);
+    box-shadow: none;
+  }
+
   button:hover,
   input[type="button"]:hover,
   input[type="submit"]:hover {
@@ -120,6 +133,17 @@
   button:focus-visible,
   input:focus-visible {
     @apply outline-none ring-2 ring-offset-2 ring-[var(--border-focus)];
+  }
+
+  input:disabled,
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  button[type="submit"]:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-muted);
   }
 
   /* --- LABELS --- */

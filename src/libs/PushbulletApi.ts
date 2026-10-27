@@ -20,6 +20,7 @@ export default class PushbulletApi {
         return fetch(`${this.BASE_URL}${path}`, {
             method: input.method,
             headers: reqHeaders,
+            body: input.body
         })
     }
 }
