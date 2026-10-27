@@ -3,11 +3,13 @@ import { createRouter, createWebHistory } from 'vue-router'
 import ChatPage from './pages/HomePage.vue'
 import LoginPage from './pages/LoginPage.vue'
 import Authenticate from './pages/authenticate.vue'
+import { useMessagesStore } from './stores/useMessages'
 
 const routes = [
     {
         path: '/',
-        component: ChatPage
+        component: ChatPage,
+        meta: { requiresAuth: true }
     },
     {
         path: '/login',
@@ -22,4 +24,17 @@ const routes = [
 export const router = createRouter({
     history: createWebHistory(),
     routes,
+})
+
+router.beforeEach((to, from, next) => {
+    const store = useMessagesStore()
+    const isAuthenticated = !!store.appToken
+
+    if (to.meta.requiresAuth && !isAuthenticated) {
+        next('/login')
+    } else if (to.path === '/login' && isAuthenticated) {
+        next('/')
+    } else {
+        next()
+    }
 })

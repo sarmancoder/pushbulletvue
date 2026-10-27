@@ -2,9 +2,16 @@
 import { storeToRefs } from 'pinia';
 import { useMessagesStore } from '../stores/useMessages';
 import Popover from './Popover.vue';
+import { useRouter } from 'vue-router';
 
 const messages = useMessagesStore()
 const { user } = storeToRefs(messages)
+const router = useRouter()
+
+function logout() {
+    messages.logout()
+    router.push('/login')
+}
 function greet() {
     console.log('Holaaa')
 }
@@ -34,7 +41,7 @@ function greet() {
             </template>
             <div class="flex flex-col items-end">
                 <h2 class="text-2xl">Panel de usuario</h2>
-                <button class="bg-(--accent-primary) text-white px-5 py-2 rounded-md">
+                <button @click="logout" class="bg-(--accent-primary) text-white px-5 py-2 rounded-md">
                     Cerrar sesión
                 </button>
             </div>
