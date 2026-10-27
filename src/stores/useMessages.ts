@@ -95,7 +95,42 @@ export const useMessagesStore = defineStore('counter', () => {
         })
     })
 
-    return { messages, loading, appToken, user }
+    async function pushMessage(message: string) {
+        if (!appToken.value) return
+
+        const url = 'https://api.pushbullet.com/v2/pushes?active=true';
+        const options = {
+            method: 'POST',
+            headers: {
+                'Access-Token': appToken.value,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title: 'Notificación desde mi App',
+                body: message,
+                type: 'note'
+                // Elimina completamente 'email' y 'receiver_iden' si quieres que llegue a tus dispositivos por defecto
+            })
+        };
+
+        try {
+            const response = await fetch(url, options);
+            const data = await response.json();
+            console.log(data);
+        } catch (error) {
+            console.error(error);
+        }
+        /*const apiPusher = await PushbulletApiPusher.getInstance({ token: appToken.value })
+        const data = await apiPusher.postPush({
+            body: message,
+            type: 'note',
+            source_device_iden: user.value?.iden
+        })
+        console.log(data)
+        return data*/
+    }
+
+    return { messages, loading, appToken, user, pushMessage }
 }, {
     persist: {
         key: 'pushbullet_secure_session', // Nombre de la clave en el almacenamiento

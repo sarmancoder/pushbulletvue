@@ -12,6 +12,11 @@ export default class PushbulletApi {
             'Access-Token': this.token
         } as any
 
+        console.log(path, {
+            ...input,
+            ...reqHeaders
+        })
+
         return fetch(`${this.BASE_URL}${path}`, {
             method: input.method,
             headers: reqHeaders,

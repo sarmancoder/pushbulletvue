@@ -26,4 +26,18 @@ export default class PushbulletApiPusher extends PushbulletApi {
         const data = await req.json()
         return data as { pushes: PusherType[] }
     }
+
+    async postPush(dataToSend: Partial<PusherType>) {
+        console.log({ dataToSend })
+        const query = new URLSearchParams({ active: 'true' })
+        const req = await this.request(`/pushes?${query}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            } as any,
+            body: dataToSend as any
+        })
+        const data = await req.json()
+        return data as { push: PusherType[] }
+    }
 }
