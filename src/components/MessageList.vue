@@ -1,22 +1,31 @@
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, onMounted } from 'vue'
 import ChatMessage from './ChatMessage.vue'
 import { useMessagesStore } from '../stores/useMessages.ts'
 import { storeToRefs } from 'pinia'
+import { useIntersectionObserver } from '@vueuse/core'
+import { shallowRef, useTemplateRef } from 'vue'
+
 const messagesStore = useMessagesStore()
-const { messages, loading } = storeToRefs(messagesStore)
+const { messages, firstScrolled, loading } = storeToRefs(messagesStore)
 
-const scrollToBottom = async () => {
-    await nextTick()
-    window.scrollTo({
-        top: document.body.scrollHeight
-    })
-}
+const loaderDiv = ref()
 
-// Hacer scroll al montar y cuando cambien los mensajes
-watch(() => messages, () => {
-    scrollToBottom()
-}, { deep: true, immediate: true })
+const target = useTemplateRef('target')
+const targetIsVisible = shallowRef(false)
+
+const { stop } = useIntersectionObserver(
+    target,
+    ([entry], observerElement) => {
+        if (!firstScrolled.value) return
+        const isVisible = entry?.isIntersecting || false
+        targetIsVisible.value = isVisible
+        if (isVisible) {
+            messagesStore.retrieveMessages()
+        }
+    },
+)
+
 </script>
 
 <template>
@@ -27,14 +36,14 @@ watch(() => messages, () => {
             <div class="loading-spinner"></div>
             <span>Cargando conversación...</span>
         </div>
+        <div class="h-5" ref="target"></div>
 
         <!-- Estado vacío -->
-        <div v-else-if="messages.length === 0" class="messages-empty">
+        <div v-if="!loading && messages.length === 0" class="messages-empty">
             <div class="empty-icon">💬</div>
             <p class="empty-title">No hay mensajes aún</p>
             <p class="empty-subtitle">Sé el primero en iniciar la conversación.</p>
         </div>
-
         <!-- Lista de mensajes con datos por defecto -->
         <div v-else class="messages-list">
             <ChatMessage v-for="msg in messages" :key="msg.id" :sender="msg.sender" :message="msg.text"

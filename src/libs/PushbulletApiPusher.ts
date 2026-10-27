@@ -19,12 +19,15 @@ export default class PushbulletApiPusher extends PushbulletApi {
         return PushbulletApiPusher.instance
     }
 
-    async getPushes() {
-        const req = await this.request('/pushes', {
+    async getPushes(cursor: string) {
+        const params = new URLSearchParams({
+            cursor: cursor
+        })
+        const req = await this.request(`/pushes?${params.toString()}`, {
             method: 'GET',
         })
         const data = await req.json()
-        return data as { pushes: PusherType[] }
+        return data as { cursor: string, pushes: PusherType[] }
     }
 
     async postPush(dataToSend: Partial<PusherType>) {
