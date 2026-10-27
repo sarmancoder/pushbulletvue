@@ -28,12 +28,13 @@ export const useMessagesStore = defineStore('counter', () => {
             loading.value = true
             const data = await PushbulletApiPusher.getInstance({ token: appToken.value }).getPushes(cursor.value)
             cursor.value = data.cursor
+            console.table(data.pushes.filter(a => a.body === 'web' || a.body === 'Móvil'))
             const _messages = (data.pushes.map((x) => ({
                 id: x.iden,
                 text: x.type === 'note' ? x.body : x.type === 'link' ? x.url : x.file_url,
                 sender: x.sender_name,
                 timestamp: x.created,
-                isMe: x.iden === user.value?.iden,
+                isMe: !x.source_device_iden,
                 type: x.type
             })) as Message[]).sort((a, b) => a.timestamp - b.timestamp);
             messages.value = [..._messages, ...messages.value,]
