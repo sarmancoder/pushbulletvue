@@ -56,7 +56,7 @@ const isUrl = computed(() => props.message.startsWith('http'))
             </div>
 
             <img v-if="isImage" :src="message" class="max-w-sm" />
-            <video v-else-if="isVideo" :src="message" class="max-w-sm" />
+            <video v-else-if="isVideo" :src="message" class="max-w-sm" controls />
             <a v-else-if="isUrl" target="_blank" class="text-blue-800" :href="message">
                 {{ message }}
             </a>

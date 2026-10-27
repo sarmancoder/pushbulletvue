@@ -22,7 +22,7 @@ const { stop } = useIntersectionObserver(
         targetIsVisible.value = isVisible
         if (isVisible) {
             console.log('retrieving')
-            // messagesStore.retrieveMessages()
+            messagesStore.retrieveMessages()
         }
     },
 )

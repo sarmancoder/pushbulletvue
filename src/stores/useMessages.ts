@@ -46,7 +46,13 @@ export const useMessagesStore = defineStore('counter', () => {
                 cursor.value = data.cursor
             }
             const _messages = (data.pushes.map(mapPushesToMessage)).sort((a, b) => a.timestamp - b.timestamp);
-            messages.value = [...messages.value, ..._messages]
+            if (timestamp > 0) {
+                // Introducir mensaje que llego
+                messages.value = [...messages.value, ..._messages]
+            } else {
+                // Paginación
+                messages.value = [..._messages, ...messages.value]
+            }
         } catch (error) {
             console.log(error)
         } finally {
