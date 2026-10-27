@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { nextTick, ref, watch } from "vue";
 import PushbulletApiPusher from "../libs/PushbulletApiPusher";
 import PushbulletApiUser from "../libs/PushbulletApiUser";
-import type { User } from "../types";
+import type { PusherType, User } from "../types";
 
 type Message = {
     id: string;
@@ -12,6 +12,15 @@ type Message = {
     isMe: boolean;
     type: 'note' | 'url'
 }
+
+const mapPushesToMessage = (x: PusherType) => ({
+    id: x.iden,
+    text: x.type === 'note' ? x.body : x.type === 'link' ? x.url : x.file_url,
+    sender: x.sender_name,
+    timestamp: x.created,
+    isMe: !x.source_device_iden,
+    type: x.type
+} as Message)
 
 export const useMessagesStore = defineStore('counter', () => {
     const appToken = ref('')
@@ -23,21 +32,21 @@ export const useMessagesStore = defineStore('counter', () => {
 
     const loading = ref(true)
 
-    async function retrieveMessages() {
+    async function retrieveMessages(timestamp = -1) {
         try {
             loading.value = true
-            const data = await PushbulletApiPusher.getInstance({ token: appToken.value }).getPushes(cursor.value)
-            cursor.value = data.cursor
-            console.table(data.pushes.filter(a => a.body === 'web' || a.body === 'Móvil'))
-            const _messages = (data.pushes.map((x) => ({
-                id: x.iden,
-                text: x.type === 'note' ? x.body : x.type === 'link' ? x.url : x.file_url,
-                sender: x.sender_name,
-                timestamp: x.created,
-                isMe: !x.source_device_iden,
-                type: x.type
-            })) as Message[]).sort((a, b) => a.timestamp - b.timestamp);
-            messages.value = [..._messages, ...messages.value,]
+            const data = await PushbulletApiPusher.getInstance({ token: appToken.value })
+                .getPushes(timestamp > 0 ? '' : cursor.value, timestamp)
+            console.log({
+                new: data.cursor,
+                enviado: cursor.value
+            })
+            if (data.cursor) {
+                console.log(' - nuevo cursor', data.cursor)
+                cursor.value = data.cursor
+            }
+            const _messages = (data.pushes.map(mapPushesToMessage)).sort((a, b) => a.timestamp - b.timestamp);
+            messages.value = [...messages.value, ..._messages]
         } catch (error) {
             console.log(error)
         } finally {
@@ -53,8 +62,16 @@ export const useMessagesStore = defineStore('counter', () => {
         loading.value = false
         socket.value = listenUpdates({
             accessToken: appToken.value,
-            onMessage(message) {
-                console.log('Nueva actualización', message)
+            async onMessage(message) {
+                const data = JSON.parse(message.data)
+                if (data.subtype !== "push") {
+                    return
+                }
+                const timestamp = messages.value[messages.value.length - 1].timestamp
+                retrieveMessages(timestamp)
+                window.scrollTo({
+                    top: document.body.scrollHeight
+                })
             },
         })
         await nextTick()

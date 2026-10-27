@@ -19,10 +19,10 @@ export default class PushbulletApiPusher extends PushbulletApi {
         return PushbulletApiPusher.instance
     }
 
-    async getPushes(cursor: string) {
-        const params = new URLSearchParams({
-            cursor: cursor
-        })
+    async getPushes(cursor: string, timestamp: number) {
+        const params = new URLSearchParams({ limit: '300', active: 'true' })
+        if (cursor.length > 0) params.set('cursor', cursor)
+        if (timestamp > 0) params.set('modified_after', timestamp.toString())
         const req = await this.request(`/pushes?${params.toString()}`, {
             method: 'GET',
         })

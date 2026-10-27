@@ -21,7 +21,8 @@ const { stop } = useIntersectionObserver(
         const isVisible = entry?.isIntersecting || false
         targetIsVisible.value = isVisible
         if (isVisible) {
-            messagesStore.retrieveMessages()
+            console.log('retrieving')
+            // messagesStore.retrieveMessages()
         }
     },
 )
