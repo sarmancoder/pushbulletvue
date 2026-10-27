@@ -1,8 +1,8 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 
-// Props para recibir los datos del mensaje desde un componente padre
-defineProps({
+// 1. Asignamos defineProps a una constante (por convención se llama 'props')
+const props = defineProps({
     sender: {
         type: String,
         required: true
@@ -21,12 +21,24 @@ defineProps({
     }
 })
 
-const isImage = computed(() => message.endsWith('png') || message.endsWith('jpg'))
-const isVideo = computed(() => message.endsWith('mp4'))
-const isUrl = computed(() => message.startsWith('http'))
+// Arrays con las extensiones permitidas
+const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg']
+const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov']
+
+// Comprobamos si el mensaje termina con alguna de las extensiones del array
+const isImage = computed(() => {
+    const msg = props.message.toLowerCase()
+    return imageExtensions.some(ext => msg.endsWith(ext))
+})
+
+const isVideo = computed(() => {
+    const msg = props.message.toLowerCase()
+    return videoExtensions.some(ext => msg.endsWith(ext))
+})
+
+const isUrl = computed(() => props.message.startsWith('http'))
 
 </script>
-
 <template>
     <!-- Contenedor general del mensaje: se alinea a la derecha si es propio, a la izquierda si es ajeno -->
     <div :class="['message-wrapper', isMe ? 'message-wrapper-me' : 'message-wrapper-other']">
