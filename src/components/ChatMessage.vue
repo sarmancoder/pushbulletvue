@@ -74,7 +74,7 @@ const isUrl = computed(() => props.message.startsWith('http'))
 
     /* Contenedor principal del mensaje */
     .message-wrapper {
-        @apply flex items-end gap-3 my-3 w-full;
+        @apply flex items-end gap-3 my-3 w-full min-w-0;
     }
 
     .message-wrapper-me {
@@ -96,7 +96,7 @@ const isUrl = computed(() => props.message.startsWith('http'))
     /* Burbuja de texto base */
     .message-bubble {
         border: 1px solid var(--border-color, #e2e8f0);
-        @apply max-w-[75%] px-4 py-3 rounded-2xl shadow-sm transition-all duration-200;
+        @apply max-w-[75%] px-4 py-3 rounded-2xl shadow-sm transition-all duration-200 min-w-0 overflow-hidden;
     }
 
     /* Estilo si el mensaje es tuyo (destacado con color acento) */
@@ -116,20 +116,24 @@ const isUrl = computed(() => props.message.startsWith('http'))
 
     /* Cabecera de la burbuja (remitente y hora) */
     .message-header {
-        @apply flex items-center justify-between gap-4 mb-1 text-xs opacity-80;
+        @apply flex items-center justify-between gap-4 mb-1 text-xs opacity-80 min-w-0;
     }
 
     .message-sender {
-        @apply font-semibold;
+        @apply font-semibold truncate;
     }
 
     .message-time {
-        @apply text-[10px];
+        @apply text-[10px] shrink-0;
     }
 
     /* Contenido del mensaje */
     .message-text {
-        @apply text-sm leading-relaxed break-words;
+        @apply text-sm leading-relaxed break-all overflow-hidden text-ellipsis whitespace-nowrap;
+    }
+
+    .message-bubble a {
+        @apply block overflow-hidden text-ellipsis whitespace-nowrap max-w-full;
     }
 }
 </style>

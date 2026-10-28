@@ -26,7 +26,6 @@ const { stop } = useIntersectionObserver(
         }
     },
 )
-
 </script>
 
 <template>
@@ -37,15 +36,15 @@ const { stop } = useIntersectionObserver(
             <div class="loading-spinner"></div>
             <span>Cargando conversación...</span>
         </div>
-        <div class="h-5" ref="target"></div>
+        <div class="h-4" ref="target"></div>
 
         <!-- Estado vacío -->
         <div v-if="!loading && messages.length === 0" class="messages-empty">
             <div class="empty-icon">💬</div>
             <p class="empty-title">No hay mensajes aún</p>
-            <p class="empty-subtitle">Sé el primero en iniciar la conversación.</p>
+            <p class="empty-subtitle">Escribe el primer mensaje para empezar la conversación.</p>
         </div>
-        <!-- Lista de mensajes con datos por defecto -->
+        <!-- Lista de mensajes -->
         <div v-else class="messages-list">
             <ChatMessage v-for="msg in messages" :key="msg.id" :sender="msg.sender" :message="msg.text"
                 :timestamp="msg.timestamp" :is-me="msg.isMe" />
@@ -55,16 +54,14 @@ const { stop } = useIntersectionObserver(
 </template>
 
 <style scoped>
-/* Tailwind CSS v4 usa @import en lugar de las directivas antiguas */
 @import "tailwindcss";
 
 @layer components {
 
     /* Contenedor principal de la lista */
     .messages-container {
-        background-color: var(--bg-primary, #f8fafc);
-        border: 1px solid var(--border-color, #e2e8f0);
-        @apply pb-40 px-10 pt-15;
+        background-color: transparent;
+        @apply flex-1 overflow-y-auto px-4 sm:px-6 py-6 h-full;
     }
 
     /* Scrollbar fina */
@@ -83,12 +80,12 @@ const { stop } = useIntersectionObserver(
 
     /* Wrapper del listado */
     .messages-list {
-        @apply flex flex-col justify-end min-h-full space-y-1;
+        @apply flex flex-col gap-1;
     }
 
     /* Estado vacío */
     .messages-empty {
-        @apply flex flex-col items-center justify-center h-full text-center p-6 my-auto;
+        @apply flex flex-col items-center justify-center h-full text-center p-6;
     }
 
     .empty-icon {
@@ -102,13 +99,13 @@ const { stop } = useIntersectionObserver(
 
     .empty-subtitle {
         color: var(--text-muted, #94a3b8);
-        @apply text-xs mt-1;
+        @apply text-sm mt-1;
     }
 
     /* Estado de carga */
     .messages-loading {
         color: var(--text-secondary, #475569);
-        @apply flex flex-col items-center justify-center h-full gap-3 text-xs font-medium my-auto;
+        @apply flex flex-col items-center justify-center h-full gap-3 text-xs font-medium;
     }
 
     .loading-spinner {
