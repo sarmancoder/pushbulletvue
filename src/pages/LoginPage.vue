@@ -101,7 +101,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useMessagesStore } from '../stores/useMessages';
 import { storeToRefs } from 'pinia';
@@ -111,7 +111,7 @@ const router = useRouter()
 const { appToken } = storeToRefs(useMessagesStore())
 
 // Estado para controlar la pestaña activa ('manual' por defecto al estar recomendado)
-const activeTab = ref('manual')
+const activeTab = ref<'manual' | 'oauth'>('manual')
 const manualToken = ref('')
 
 // Lógica de guardado del token manual

@@ -1,44 +1,39 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 
-const props = defineProps({
-    modelValue: {
-        type: Boolean,
-        default: undefined,
-    },
-    placement: {
-        type: String,
-        default: 'bottom',
-    },
-    closeOnClick: {
-        type: Boolean,
-        default: true,
-    },
-    disabled: {
-        type: Boolean,
-        default: false,
-    },
-    offset: {
-        type: String,
-        default: 'mt-2',
-    },
-    panelClass: {
-        type: String,
-        default: '',
-    },
+type Placement = 'bottom' | 'top' | 'left' | 'right'
+
+const props = withDefaults(defineProps<{
+    modelValue?: boolean
+    placement?: Placement
+    closeOnClick?: boolean
+    disabled?: boolean
+    offset?: string
+    panelClass?: string
+}>(), {
+    modelValue: undefined,
+    placement: 'bottom',
+    closeOnClick: true,
+    disabled: false,
+    offset: 'mt-2',
+    panelClass: '',
 })
 
-const emit = defineEmits(['update:modelValue', 'open', 'close'])
+const emit = defineEmits<{
+    'update:modelValue': [value: boolean]
+    open: []
+    close: []
+}>()
 
-const root = ref(null)
+const root = ref<HTMLElement | null>(null)
 const internalOpen = ref(false)
 
 const isControlled = computed(() => props.modelValue !== undefined)
 const isOpen = computed(() =>
-    isControlled.value ? props.modelValue : internalOpen.value
+    isControlled.value ? !!props.modelValue : internalOpen.value
 )
 
-function setOpen(value) {
+function setOpen(value: boolean) {
     if (props.disabled && value) return
     if (isOpen.value === value) return
 
@@ -48,19 +43,22 @@ function setOpen(value) {
         internalOpen.value = value
     }
 
-    emit(value ? 'open' : 'close')
+    if (value) emit('open')
+    else emit('close')
 }
 
 function toggle() {
     setOpen(!isOpen.value)
 }
 
-const positionClass = computed(() => ({
+const positionClasses: Record<Placement, string> = {
     bottom: 'top-full left-0',
     top: 'bottom-full left-0',
     left: 'right-full top-0',
     right: 'left-full top-0',
-}[props.placement]))
+}
+
+const positionClass = computed(() => positionClasses[props.placement])
 
 const offsetClass = computed(() => ({
     bottom: props.offset,
@@ -69,15 +67,19 @@ const offsetClass = computed(() => ({
         : 'mb-2',
     left: 'mr-2',
     right: 'ml-2',
-}[props.placement]))
+} satisfies Record<Placement, string>)[props.placement])
 
-function handleOutsideClick(event) {
-    if (root.value && !root.value.contains(event.target)) {
+function handleOutsideClick(event: MouseEvent) {
+    if (root.value && !root.value.contains(event.target as Node)) {
         setOpen(false)
     }
 }
 
-function handleKeydown(event) {
+function handleContentClick() {
+    if (props.closeOnClick) setOpen(false)
+}
+
+function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape') setOpen(false)
 }
 

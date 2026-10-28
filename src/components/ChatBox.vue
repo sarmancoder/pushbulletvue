@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useMessagesStore } from '../stores/useMessages';
-import PushbulletApiFile from '../libs/PushbulletApiFile';
 const errorMessage = ref('')
 const message = ref('')
 const unable = ref(false)
@@ -9,7 +8,7 @@ const isDragging = ref(false)
 const filesLoaded = ref<File[]>([])
 const imagesLoaded = ref<string[]>([])
 
-const { pushMessage, appToken, pushFiles } = useMessagesStore()
+const { pushMessage, pushFiles } = useMessagesStore()
 
 const filesLabel = computed(() => {
     const total = filesLoaded.value.length

@@ -22,5 +22,6 @@ const crxPlugin = crx({
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: './',
   plugins: [vue(), tailwindcss(), crxPlugin],
 })

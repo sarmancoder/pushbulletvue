@@ -1,5 +1,5 @@
-<script setup>
-import { computed, onMounted, ref } from 'vue'
+<script setup lang="ts">
+import { computed } from 'vue'
 
 // 1. Asignamos defineProps a una constante (por convención se llama 'props')
 const props = defineProps({

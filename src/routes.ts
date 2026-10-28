@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 import ChatPage from './pages/HomePage.vue'
 import LoginPage from './pages/LoginPage.vue'
@@ -22,11 +22,11 @@ const routes = [
 ]
 
 export const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHashHistory(),
     routes,
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
     const store = useMessagesStore()
     const isAuthenticated = !!store.appToken
 

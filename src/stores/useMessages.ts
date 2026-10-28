@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { nextTick, ref, watch } from "vue";
 import PushbulletApiPusher from "../libs/PushbulletApiPusher";
 import PushbulletApiUser from "../libs/PushbulletApiUser";
-import type { PushbulletFile, PusherType, User } from "../types";
+import type { PusherType, User } from "../types";
 import PushbulletApiFile from "../libs/PushbulletApiFile";
 
 type Message = {
@@ -11,7 +11,7 @@ type Message = {
     text: string;
     timestamp: number;
     isMe: boolean;
-    type: 'note' | 'url'
+    type: 'note' | 'link' | 'file'
 }
 
 const mapPushesToMessage = (x: PusherType) => ({
@@ -81,8 +81,8 @@ export const useMessagesStore = defineStore('counter', () => {
                 if (data.subtype !== "push") {
                     return
                 }
-                const timestamp = messages.value[messages.value.length - 1].timestamp
-                retrieveMessages(timestamp)
+                const lastMessage = messages.value[messages.value.length - 1]
+                retrieveMessages(lastMessage ? lastMessage.timestamp : -1)
                 window.scrollTo({
                     top: document.body.scrollHeight
                 })
@@ -163,8 +163,9 @@ function listenUpdates({ onMessage, accessToken }: {
     const socket = new WebSocket(wsUrl);
 
     // Evento: Conexión abierta con éxito
-    socket.addEventListener("open", (event) => {
+    socket.addEventListener("open", () => {
         console.log("Conectado a Pushbullet WebSocket correctamente.");
+        console.log('Escuchando actualizaciones')
     });
 
     // Evento: Mensaje recibido desde Pushbullet
@@ -176,10 +177,6 @@ function listenUpdates({ onMessage, accessToken }: {
             console.error("Error al parsear el mensaje JSON:", error);
         }
     });
-
-    socket.addEventListener('open', (event) => {
-        console.log('Escuchando actualizaciones')
-    })
 
     // Evento: Error en la conexión
     socket.addEventListener("error", (event) => {

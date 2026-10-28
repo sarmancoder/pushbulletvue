@@ -1,7 +1,7 @@
-<script setup>
-import { ref, watch, nextTick } from 'vue'
+<script setup lang="ts">
+import { nextTick } from 'vue'
 import ChatMessage from './ChatMessage.vue'
-import { useMessagesStore } from '../stores/useMessages.ts'
+import { useMessagesStore } from '../stores/useMessages'
 import { storeToRefs } from 'pinia'
 import { useIntersectionObserver } from '@vueuse/core'
 import { shallowRef, useTemplateRef } from 'vue'
@@ -9,13 +9,13 @@ import { shallowRef, useTemplateRef } from 'vue'
 const messagesStore = useMessagesStore()
 const { messages, firstScrolled, loading, loadingMore } = storeToRefs(messagesStore)
 
-const messagesContainer = useTemplateRef('messagesContainer')
-const target = useTemplateRef('target')
+const messagesContainer = useTemplateRef<HTMLElement>('messagesContainer')
+const target = useTemplateRef<HTMLElement>('target')
 const targetIsVisible = shallowRef(false)
 
-const { stop } = useIntersectionObserver(
+useIntersectionObserver(
     target,
-    async ([entry], observerElement) => {
+    async ([entry]) => {
         if (!firstScrolled.value) return
         if (loadingMore.value) return
         if (loading.value && messages.value.length === 0) return
