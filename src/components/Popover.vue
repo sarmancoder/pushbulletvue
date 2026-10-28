@@ -110,8 +110,9 @@ onBeforeUnmount(() => {
 
         <!-- Panel -->
         <Transition name="popover">
-            <div v-if="isOpen" class="popover__panel" :class="[positionClass, offsetClass, panelClass]"
+            <div v-if="isOpen" class="popover__panel relative" :class="[positionClass, offsetClass, panelClass]"
                 @click="handleContentClick">
+                <span class="popover__arrow"></span>
                 <slot :open="isOpen" :close="() => setOpen(false)" :toggle="toggle" />
             </div>
         </Transition>
@@ -135,7 +136,16 @@ onBeforeUnmount(() => {
 }
 
 .popover__panel {
-    @apply absolute z-50 min-w-56 rounded-lg border border-gray-200 bg-white p-4 text-gray-800 shadow-lg;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+    @apply absolute z-50 min-w-64 rounded-xl border p-4 shadow-xl right-0 origin-top-right;
+}
+
+.popover__arrow {
+    border-color: var(--border-color);
+    background-color: var(--bg-secondary);
+    @apply absolute -top-1.5 right-4 w-3 h-3 rotate-45 border-t border-l;
 }
 
 .popover-enter-active,
@@ -145,7 +155,12 @@ onBeforeUnmount(() => {
 
 .popover-enter-from,
 .popover-leave-to {
-    @apply translate-y-1 opacity-0;
+    @apply translate-y-1 opacity-0 scale-95;
+}
+
+.popover-enter-to,
+.popover-leave-from {
+    @apply translate-y-0 opacity-100 scale-100;
 }
 
 .popover__button {

@@ -26,18 +26,26 @@ function logout() {
         </div>
         <Popover placement="bottom" v-if="user">
             <template #trigger="{ toggle }">
-                <div @click="toggle" class="text-right cursor-pointer">
-                    <p class="text-sm font-medium">
-                        {{ user.email }}
-                    </p>
-                    <p class="text-xs text-[var(--text-muted)]">
-                        iden: {{ user.iden }}
-                    </p>
+                <div @click="toggle" class="flex items-center gap-2 cursor-pointer px-2 py-1 rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors">
+                    <div class="text-right">
+                        <p class="text-sm font-medium">
+                            {{ user.email }}
+                        </p>
+                        <p class="text-xs text-[var(--text-muted)]">
+                            iden: {{ user.iden }}
+                        </p>
+                    </div>
+                    <svg class="w-4 h-4 text-[var(--text-muted)]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
                 </div>
             </template>
-            <div class="flex flex-col items-end gap-2">
-                <h2 class="text-lg font-semibold">Panel de usuario</h2>
-                <button @click="logout" class="bg-[var(--accent-primary)] text-white px-4 py-2 rounded-lg">
+            <div class="flex flex-col items-end gap-3">
+                <div class="text-right">
+                    <h2 class="text-base font-semibold">Panel de usuario</h2>
+                    <p class="text-xs text-[var(--text-muted)]">{{ user.email }}</p>
+                </div>
+                <button @click="logout" class="w-full justify-center bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] px-4 py-2 rounded-lg transition-colors">
                     Cerrar sesión
                 </button>
             </div>
