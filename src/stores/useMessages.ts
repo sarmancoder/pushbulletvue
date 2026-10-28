@@ -3,6 +3,7 @@ import { nextTick, ref, watch } from "vue";
 import PushbulletApiPusher from "../libs/PushbulletApiPusher";
 import PushbulletApiUser from "../libs/PushbulletApiUser";
 import type { PushbulletFile, PusherType, User } from "../types";
+import PushbulletApiFile from "../libs/PushbulletApiFile";
 
 type Message = {
     id: string;
@@ -101,18 +102,32 @@ export const useMessagesStore = defineStore('counter', () => {
         firstScrolled.value = true
     })
 
-    async function pushMessage(message: string, file?: PushbulletFile & { file_url: string }) {
+    async function pushFiles(message: string, files: File[]) {
+        const apiPusher = await PushbulletApiPusher.getInstance({ token: appToken.value })
+        const apiFile = PushbulletApiFile.getInstance({ token: appToken.value })
+        for (const element of files) {
+            const file = {
+                file_name: element.name,
+                file_type: element.type
+            }
+            const result = await apiFile.uploadRequest(file, element)
+            await apiPusher.postPush({
+                body: message,
+                type: 'file',
+                ...file,
+                file_url: result.file_url
+            })
+        }
+    }
+
+    async function pushMessage(message: string) {
         if (!appToken.value) return
 
         const apiPusher = await PushbulletApiPusher.getInstance({ token: appToken.value })
 
-        const data = typeof file === 'undefined' ? await apiPusher.postPush({
+        const data = await apiPusher.postPush({
             body: message,
             type: 'note',
-        }) : await apiPusher.postPush({
-            body: message,
-            type: 'file',
-            ...file
         })
         return data
     }
@@ -128,7 +143,7 @@ export const useMessagesStore = defineStore('counter', () => {
         loading.value = true
     }
 
-    return { messages, loading, loadingMore, appToken, firstScrolled, user, retrieveMessages, pushMessage, logout }
+    return { messages, loading, loadingMore, appToken, firstScrolled, user, retrieveMessages, pushFiles, pushMessage, logout }
 }, {
     persist: {
         key: 'pushbullet_secure_session', // Nombre de la clave en el almacenamiento

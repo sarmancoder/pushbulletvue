@@ -9,7 +9,7 @@ const isDragging = ref(false)
 const filesLoaded = ref<File[]>([])
 const imagesLoaded = ref<string[]>([])
 
-const { pushMessage, appToken } = useMessagesStore()
+const { pushMessage, appToken, pushFiles } = useMessagesStore()
 
 const filesLabel = computed(() => {
     const total = filesLoaded.value.length
@@ -54,17 +54,8 @@ async function sendMessage() {
         errorMessage.value = ''
         unable.value = true
         console.log(`cargando ${filesLoaded.value.length} archivos`)
-        for (const element of filesLoaded.value) {
-            const file = {
-                file_name: element.name,
-                file_type: element.type
-            }
-            const result = await PushbulletApiFile.getInstance({ token: appToken }).uploadRequest(file, element)
-            await pushMessage(message.value, {
-                ...file,
-                file_url: result.file_url
-            })
-        }
+        if (filesLoaded.value.length > 0) await pushFiles(message.value, filesLoaded.value)
+        else await pushMessage(message.value)
         message.value = ""
         filesLoaded.value = []
         imagesLoaded.value = []
