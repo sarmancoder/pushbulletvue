@@ -59,3 +59,10 @@ jobs:
             📥 Descarga el archivo `extension-release.zip`.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        permissions:
+          contents: write
+
+        steps:
+          # 1. Descargar el código del repositorio
+          - name: Checkout repository
+            uses: actions/checkout@v4
