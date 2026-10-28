@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { nextTick, ref, watch } from "vue";
 import PushbulletApiPusher from "../libs/PushbulletApiPusher";
 import PushbulletApiUser from "../libs/PushbulletApiUser";
-import type { PusherType, User } from "../types";
+import type { PushbulletFile, PusherType, User } from "../types";
 
 type Message = {
     id: string;
@@ -101,13 +101,18 @@ export const useMessagesStore = defineStore('counter', () => {
         firstScrolled.value = true
     })
 
-    async function pushMessage(message: string) {
+    async function pushMessage(message: string, file?: PushbulletFile & { file_url: string }) {
         if (!appToken.value) return
 
         const apiPusher = await PushbulletApiPusher.getInstance({ token: appToken.value })
-        const data = await apiPusher.postPush({
+
+        const data = typeof file === 'undefined' ? await apiPusher.postPush({
             body: message,
             type: 'note',
+        }) : await apiPusher.postPush({
+            body: message,
+            type: 'file',
+            ...file
         })
         return data
     }

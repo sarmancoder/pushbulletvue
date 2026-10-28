@@ -31,3 +31,5 @@ export type User = {
     modified: number;
     name: string;
 }
+
+export type PushbulletFile = { file_name: string, file_type: string }

@@ -1,6 +1,6 @@
 export default class PushbulletApi {
     private BASE_URL = "https://api.pushbullet.com/v2"
-    private token: string
+    protected token: string
 
     constructor(token: string) {
         this.token = token
