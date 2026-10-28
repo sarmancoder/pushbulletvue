@@ -1,38 +1,73 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useMessagesStore } from '../stores/useMessages';
 import PushbulletApiFile from '../libs/PushbulletApiFile';
 const errorMessage = ref('')
 const message = ref('')
 const unable = ref(false)
+const isDragging = ref(false)
+const filesLoaded = ref<File[]>([])
+const imagesLoaded = ref<string[]>([])
 
 const { pushMessage, appToken } = useMessagesStore()
 
-async function sendMessage(e: SubmitEvent) {
+const filesLabel = computed(() => {
+    const total = filesLoaded.value.length
+    return total === 1
+        ? 'Se va a cargar 1 archivo'
+        : `Se van a cargar ${total} archivos`
+})
+
+const handleDrop = (e: DragEvent) => {
+    isDragging.value = false
+    if (!e.dataTransfer) return
+    const droppedFiles = Array.from(e.dataTransfer.files) as File[]
+    processFiles(droppedFiles)
+}
+
+function readAsDataURL(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const fr = new FileReader()
+        fr.onload = () => resolve(fr.result as string)
+        fr.onerror = () => reject(fr.error)
+        fr.readAsDataURL(file)
+    })
+}
+
+async function processFiles(files: File[]) {
+    filesLoaded.value = files
+    const images = files.filter(file => file.type.startsWith('image/'))
     try {
-        const files = (e.target as HTMLFormElement)['fileAttached'].files as FileList
-        const listFiles = []
-        for (let index = 0; index < files.length; index++) {
-            const element = files[index];
-            listFiles.push({
-                file_name: element.name,
-                file_type: element.type
-            })
-        }
-        console.log(listFiles)
-        const result = await PushbulletApiFile.getInstance({ token: appToken }).uploadRequest(listFiles[0], files[0])
+        // Promise.all mantiene el mismo orden en que se soltaron los archivos
+        imagesLoaded.value = await Promise.all(images.map(readAsDataURL))
+    } catch (error: any) {
+        errorMessage.value = 'No se pudo generar la vista previa de algunas imágenes'
+    }
+}
+
+async function sendMessage() {
+    try {
         if (message.value === '') {
             errorMessage.value = 'El mensaje no puede estar vacío'
             return
         }
         errorMessage.value = ''
         unable.value = true
-        console.log(result)
-        await pushMessage(message.value, {
-            ...listFiles[0],
-            file_url: result.file_url
-        })
+        console.log(`cargando ${filesLoaded.value.length} archivos`)
+        for (const element of filesLoaded.value) {
+            const file = {
+                file_name: element.name,
+                file_type: element.type
+            }
+            const result = await PushbulletApiFile.getInstance({ token: appToken }).uploadRequest(file, element)
+            await pushMessage(message.value, {
+                ...file,
+                file_url: result.file_url
+            })
+        }
         message.value = ""
+        filesLoaded.value = []
+        imagesLoaded.value = []
     } catch (error: any) {
         errorMessage.value = error.message
     } finally {
@@ -44,13 +79,17 @@ async function sendMessage(e: SubmitEvent) {
 <template>
     <form @submit.prevent="sendMessage">
         <div class="fixed bottom-0 left-0 right-0 pb-3 sm:pb-4">
-            <div class="mx-auto w-full max-w-4xl px-3 sm:px-4 lg:px-6">
-                <div
-                    class="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] shadow-lg overflow-hidden">
+            <div class="mx-auto w-full max-w-4xl px-3 sm:px-4 lg:px-6" @dragenter.prevent="isDragging = true"
+                @dragover.prevent="isDragging = true" @dragleave.prevent="isDragging = false"
+                @drop.prevent="handleDrop">
+                <div class="dropzone rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] shadow-lg overflow-hidden"
+                    :class="{ 'is-dragging': isDragging }">
                     <p v-if="errorMessage" class="px-4 pt-2 text-xs font-medium text-red-500">{{ errorMessage }}</p>
-                    <div class="p-2">
-                        <label for="fileAttach">Archivo a enviar</label>
-                        <input type="file" name="fileAttached" id="fileAttach" />
+                    <p v-if="filesLoaded.length" class="px-4 pt-2 text-xs font-medium text-[var(--text-secondary)]">
+                        {{ filesLabel }}
+                    </p>
+                    <div v-if="imagesLoaded.length" class="flex flex-row flex-wrap gap-2 p-2">
+                        <img v-for="(src, index) in imagesLoaded" :key="index" :src="src" width="200" />
                     </div>
                     <div class="flex flex-row items-center gap-2 p-2 sm:p-2.5">
                         <input :readonly="unable" placeholder="Escribe aquí tu mensaje..." v-model="message"
@@ -63,4 +102,33 @@ async function sendMessage(e: SubmitEvent) {
     </form>
 </template>
 
-<style lang="css" scoped></style>
+<style lang="css" scoped>
+.dropzone {
+    position: relative;
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dropzone.is-dragging {
+    border-style: dashed;
+    border-color: var(--border-focus);
+    background-color: color-mix(in srgb, var(--accent-primary) 10%, var(--bg-secondary));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--border-focus) 30%, transparent);
+    /* Evita el parpadeo de dragleave al pasar sobre los hijos */
+    pointer-events: none;
+}
+
+/* Capa con el mensaje mientras se arrastra */
+.dropzone.is-dragging::after {
+    content: 'Suelta tus archivos aquí';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    background-color: color-mix(in srgb, var(--bg-secondary) 85%, transparent);
+    backdrop-filter: blur(2px);
+}
+</style>
