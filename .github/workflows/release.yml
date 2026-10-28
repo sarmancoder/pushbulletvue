@@ -3,7 +3,7 @@ name: Build and Release Extension
 on:
   push:
     branches:
-      - main # Se ejecuta cada vez que hay un push a la rama main
+      - main
 
 jobs:
   build-and-release:
@@ -14,34 +14,40 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Configurar Node.js
+      # 2. Configurar pnpm de forma oficial
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest # O una versión específica si lo prefieres, ej: 9.x
+
+      # 3. Configurar Node.js (conectado a pnpm)
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # O la versión de Node que estés usando
-          cache: 'npm'
+          node-version: '20'
+          cache: 'pnpm' # <-- Cambiado a pnpm para usar el gestor de caché correcto
 
-      # 3. Instalar dependencias
+      # 4. Instalar dependencias con pnpm
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
 
-      # 4. Compilar el proyecto (genera la carpeta dist)
+      # 5. Compilar el proyecto
       - name: Build project
-        run: npm run build
+        run: pnpm build
 
-      # 5. Comprimir la carpeta dist en un archivo ZIP
+      # 6. Comprimir la carpeta dist en un archivo ZIP
       - name: Zip dist folder
         run: |
           cd dist
           zip -r ../extension-release.zip *
           cd ..
 
-      # 6. Generar un número de versión automático basado en la fecha/commit o usar un tag
+      # 7. Generar un número de versión automático
       - name: Generate Release Tag
         id: tag
         run: echo "tag_name=v1.0.$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
 
-      # 7. Crear la Release en GitHub y adjuntar el ZIP
+      # 8. Crear la Release en GitHub y adjuntar el ZIP
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
@@ -49,7 +55,7 @@ jobs:
           name: "Pushbullet Extension Release ${{ steps.tag.outputs.tag_name }}"
           files: extension-release.zip
           body: |
-            ✨ Nueva versión automática de la extensión compilada desde la rama `main`.
-            📥 Descarga el archivo `extension-release.zip` y descárgalo o súbelo a la tienda.
+            ✨ Nueva versión automática de la extensión compilada con pnpm desde la rama `main`.
+            📥 Descarga el archivo `extension-release.zip`.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
