@@ -1,0 +1,55 @@
+name: Build and Release Extension
+
+on:
+  push:
+    branches:
+      - main # Se ejecuta cada vez que hay un push a la rama main
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargar el código del repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Configurar Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # O la versión de Node que estés usando
+          cache: 'npm'
+
+      # 3. Instalar dependencias
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Compilar el proyecto (genera la carpeta dist)
+      - name: Build project
+        run: npm run build
+
+      # 5. Comprimir la carpeta dist en un archivo ZIP
+      - name: Zip dist folder
+        run: |
+          cd dist
+          zip -r ../extension-release.zip *
+          cd ..
+
+      # 6. Generar un número de versión automático basado en la fecha/commit o usar un tag
+      - name: Generate Release Tag
+        id: tag
+        run: echo "tag_name=v1.0.$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+
+      # 7. Crear la Release en GitHub y adjuntar el ZIP
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag.outputs.tag_name }}
+          name: "Pushbullet Extension Release ${{ steps.tag.outputs.tag_name }}"
+          files: extension-release.zip
+          body: |
+            ✨ Nueva versión automática de la extensión compilada desde la rama `main`.
+            📥 Descarga el archivo `extension-release.zip` y descárgalo o súbelo a la tienda.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
