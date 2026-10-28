@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, nextTick, onMounted } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import ChatMessage from './ChatMessage.vue'
 import { useMessagesStore } from '../stores/useMessages.ts'
 import { storeToRefs } from 'pinia'
@@ -7,35 +7,62 @@ import { useIntersectionObserver } from '@vueuse/core'
 import { shallowRef, useTemplateRef } from 'vue'
 
 const messagesStore = useMessagesStore()
-const { messages, firstScrolled, loading } = storeToRefs(messagesStore)
+const { messages, firstScrolled, loading, loadingMore } = storeToRefs(messagesStore)
 
-const loaderDiv = ref()
-
+const messagesContainer = useTemplateRef('messagesContainer')
 const target = useTemplateRef('target')
 const targetIsVisible = shallowRef(false)
 
 const { stop } = useIntersectionObserver(
     target,
-    ([entry], observerElement) => {
+    async ([entry], observerElement) => {
         if (!firstScrolled.value) return
+        if (loadingMore.value) return
+        if (loading.value && messages.value.length === 0) return
         const isVisible = entry?.isIntersecting || false
         targetIsVisible.value = isVisible
         if (isVisible) {
             console.log('retrieving')
-            messagesStore.retrieveMessages()
+            const container = messagesContainer.value
+            if (container) {
+                const previousScrollHeight = container.scrollHeight
+                const previousScrollTop = container.scrollTop
+                await messagesStore.retrieveMessages()
+                await nextTick()
+                // Double RAF to ensure DOM updated
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        if (!container) return
+                        const newScrollHeight = container.scrollHeight
+                        const diff = newScrollHeight - previousScrollHeight
+                        if (diff > 0) {
+                            container.scrollTop = previousScrollTop + diff
+                        }
+                    })
+                })
+            } else {
+                await messagesStore.retrieveMessages()
+            }
         }
     },
 )
 </script>
 
 <template>
-    <div class="messages-container">
+    <div ref="messagesContainer" class="messages-container">
 
-        <!-- Estado de carga -->
-        <div v-if="loading" class="messages-loading">
+        <!-- Estado de carga inicial -->
+        <div v-if="loading && messages.length === 0" class="messages-loading">
             <div class="loading-spinner"></div>
             <span>Cargando conversación...</span>
         </div>
+
+        <!-- Indicador de carga al paginar (más visible) -->
+        <div v-if="loadingMore" class="messages-loading-top">
+            <div class="loading-spinner"></div>
+            <span>Cargando mensajes anteriores...</span>
+        </div>
+
         <div class="h-4" ref="target"></div>
 
         <!-- Estado vacío -->
@@ -102,10 +129,16 @@ const { stop } = useIntersectionObserver(
         @apply text-sm mt-1;
     }
 
-    /* Estado de carga */
+    /* Estado de carga inicial */
     .messages-loading {
         color: var(--text-secondary, #475569);
-        @apply flex flex-col items-center justify-center h-full gap-3 text-xs font-medium;
+        @apply flex flex-col items-center justify-center h-full gap-3 text-sm font-medium;
+    }
+
+    /* Indicador de carga al paginar (más visible) */
+    .messages-loading-top {
+        color: var(--text-primary, #0f172a);
+        @apply flex flex-row items-center justify-center gap-2 py-4 mb-2 text-sm font-semibold bg-[var(--bg-secondary)]/60 rounded-lg;
     }
 
     .loading-spinner {

@@ -31,10 +31,16 @@ export const useMessagesStore = defineStore('counter', () => {
     const messages = ref<Message[]>([])
 
     const loading = ref(true)
+    const loadingMore = ref(false)
 
     async function retrieveMessages(timestamp = -1) {
         try {
-            loading.value = true
+            const isPagination = timestamp <= 0 && messages.value.length > 0
+            if (isPagination) {
+                loadingMore.value = true
+            } else {
+                loading.value = true
+            }
             const data = await PushbulletApiPusher.getInstance({ token: appToken.value })
                 .getPushes(timestamp > 0 ? '' : cursor.value, timestamp)
             console.log({
@@ -57,6 +63,7 @@ export const useMessagesStore = defineStore('counter', () => {
             console.log(error)
         } finally {
             loading.value = false
+            loadingMore.value = false
         }
     }
 
@@ -116,7 +123,7 @@ export const useMessagesStore = defineStore('counter', () => {
         loading.value = true
     }
 
-    return { messages, loading, appToken, firstScrolled, user, retrieveMessages, pushMessage, logout }
+    return { messages, loading, loadingMore, appToken, firstScrolled, user, retrieveMessages, pushMessage, logout }
 }, {
     persist: {
         key: 'pushbullet_secure_session', // Nombre de la clave en el almacenamiento
