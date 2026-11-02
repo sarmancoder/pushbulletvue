@@ -1,0 +1,5 @@
+- notificaciones
+- revisar lo que venga de everything para no meter lo mismo otra vez
+- cachear mensajes en localstorage o algun otro lugar para no tener que recargar
+- al momento de abrir la app, pedir actualizaciones en base al ultimo timestamp adentro de los pushes
+- crear sidebar con tareas
