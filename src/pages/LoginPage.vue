@@ -105,9 +105,10 @@
 import { ref } from 'vue'
 import { useMessagesStore } from '../stores/useMessages';
 import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const router = useRouter()
+const route = useRoute()
 const { appToken } = storeToRefs(useMessagesStore())
 
 // Estado para controlar la pestaña activa ('manual' por defecto al estar recomendado)
@@ -121,7 +122,9 @@ const saveManualToken = () => {
         return
     }
     appToken.value = manualToken.value.trim()
-    router.push('/')
+    // Volvemos a la ruta que originó el login (por ejemplo /popup) o a la principal
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
+    router.push(redirect)
 }
 
 // Lógica de redirección a OAuth2 de Pushbullet

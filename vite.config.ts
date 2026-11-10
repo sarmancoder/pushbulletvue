@@ -10,7 +10,7 @@ const crxPlugin = crx({
     version: '1.0.0',
     description: 'Extensión creada con Vue 3 y Vite para pushbullet',
     action: {
-      default_popup: 'popup.html',
+      default_popup: 'index.html#/popup',
       default_icon: 'icons/icon128.png' // Opcional: ruta dentro de tu carpeta public/
     },
     permissions: [
@@ -23,13 +23,5 @@ const crxPlugin = crx({
 // https://vite.dev/config/
 export default defineConfig({
   base: './',
-  plugins: [vue(), tailwindcss(), crxPlugin],
-  build: {
-    rollupOptions: {
-      input: {
-        index: 'index.html',
-        popup: 'popup.html'
-      }
-    }
-  }
+  plugins: [vue(), tailwindcss(), crxPlugin]
 })

@@ -169,3 +169,33 @@ body {
     @apply block text-sm font-medium mb-1.5;
   }
 }
+
+/* ==========================================
+   3. MODO POPUP (ruta /popup)
+   Todo el HTML queda limitado a 520x520 px
+   ========================================== */
+html.popup-mode,
+html.popup-mode body {
+  width: 520px;
+  max-width: 520px;
+  height: 520px;
+  max-height: 520px;
+  overflow: hidden;
+}
+
+html.popup-mode #app {
+  width: 520px;
+  max-width: 520px;
+  height: 520px;
+  max-height: 520px;
+}
+
+/* El alto se calcula sobre los 520px del popup y no sobre el 100vh de la pestaña */
+html.popup-mode .home-root {
+  height: 520px;
+  min-height: 520px;
+}
+
+html.popup-mode .chat-section {
+  min-height: calc(520px - 12rem);
+}
