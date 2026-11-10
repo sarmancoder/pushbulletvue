@@ -44,23 +44,26 @@ export const useMessagesStore = defineStore('counter', () => {
             }
             const data = await PushbulletApiPusher.getInstance({ token: appToken.value })
                 .getPushes(timestamp > 0 ? '' : cursor.value, timestamp)
-            console.log({
-                new: data.cursor,
-                enviado: cursor.value
-            })
             if (data.cursor) {
                 console.log(' - nuevo cursor', data.cursor)
                 cursor.value = data.cursor
             }
-            const _messages = (data.pushes.map(mapPushesToMessage)).sort((a, b) => a.timestamp - b.timestamp);
+            const msgs = messages.value.length === 0
+                ? data.pushes
+                : data.pushes.filter(d => !messages.value.find(m => m.id === d.iden))
+
+            if (msgs.length == 0) return;
+
+            const _messages = (msgs.map(mapPushesToMessage)).sort((a, b) => a.timestamp - b.timestamp);
             if (timestamp > 0) {
                 (window as any).chrome.notifications.create({
                     type: 'basic',
                     iconUrl: 'icons/icon128.png',
                     title: 'Pushbullet by sarman',
-                    message: _messages.length > 0 ? 'Nuevas actualizaciones' : _messages[0].type == 'file' ? 'Nuevo archivo' : 'Nuevo mensaje',
+                    message: _messages.length > 1 ? 'Nuevas actualizaciones' : _messages[0].type == 'file' ? 'Nuevo archivo' : _messages[0].text,
                     priority: 2
                 });
+                messages.value = [...messages.value, ..._messages]
             } else {
                 // Paginación
                 messages.value = [..._messages, ...messages.value]
@@ -134,6 +137,16 @@ export const useMessagesStore = defineStore('counter', () => {
             body: message,
             type: 'note',
         })
+
+        messages.value = [...messages.value, {
+            id: data.iden,
+            text: data.type === 'note' ? data.body : data.type === 'link' ? data.url : data.file_url,
+            sender: data.sender_name,
+            timestamp: data.created,
+            isMe: !data.source_device_iden,
+            type: data.type
+        }]
+
         return data
     }
 
