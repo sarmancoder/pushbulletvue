@@ -21,8 +21,6 @@ const crxPlugin = crx({
       default_icon: icons
     },
     permissions: [
-      'storage',
-      'tabs',
       "notifications"
     ]
   }
