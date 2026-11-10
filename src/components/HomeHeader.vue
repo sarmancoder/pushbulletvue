@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia';
 import { useMessagesStore } from '../stores/useMessages';
 import Popover from './Popover.vue';
 import { useRouter } from 'vue-router';
+import { openExtensionInTab } from '../libs/extension';
 
 const messages = useMessagesStore()
 const { user } = storeToRefs(messages)
@@ -12,21 +13,26 @@ function logout() {
     messages.logout()
     router.push('/login')
 }
+
+// Abre la extension en una pestana del navegador (ruta '/', no la del popup)
+function openExtension() {
+    openExtensionInTab('/')
+}
 </script>
 
 <template>
     <header class="header">
-        <div class="flex flex-row gap-2 items-center">
-            <a href="https://pushbullet.com/" target="_blank">
-                <img src="/logo.png" width="28" alt="Pushbullet logo" />
-            </a>
-            <span class="text-lg sm:text-xl font-semibold tracking-tight">
+        <div class="flex flex-row gap-2 items-center cursor-pointer" @click="openExtension"
+            title="Abrir Pushbullet en una pestaña">
+            <img src="/logo.png" width="28" alt="Pushbullet logo" />
+            <span target="_blank" rel="noopener" class="text-lg sm:text-xl font-semibold tracking-tight">
                 Pushbullet
             </span>
         </div>
         <Popover placement="bottom" v-if="user">
             <template #trigger="{ toggle }">
-                <div @click="toggle" class="flex items-center gap-2 cursor-pointer px-2 py-1 rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors">
+                <div @click="toggle"
+                    class="flex items-center gap-2 cursor-pointer px-2 py-1 rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors">
                     <div class="text-right">
                         <p class="text-sm font-medium">
                             {{ user.email }}
@@ -35,7 +41,8 @@ function logout() {
                             iden: {{ user.iden }}
                         </p>
                     </div>
-                    <svg class="w-4 h-4 text-[var(--text-muted)]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-[var(--text-muted)]" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                     </svg>
                 </div>
@@ -45,7 +52,8 @@ function logout() {
                     <h2 class="text-base font-semibold">Panel de usuario</h2>
                     <p class="text-xs text-[var(--text-muted)]">{{ user.email }}</p>
                 </div>
-                <button @click="logout" class="w-full justify-center bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] px-4 py-2 rounded-lg transition-colors">
+                <button @click="logout"
+                    class="w-full justify-center bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] px-4 py-2 rounded-lg transition-colors">
                     Cerrar sesión
                 </button>
             </div>
