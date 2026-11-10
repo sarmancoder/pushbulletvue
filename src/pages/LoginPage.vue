@@ -51,8 +51,12 @@
                     </p>
                 </div>
 
+
                 <!-- Formulario Manual -->
                 <div class="space-y-3">
+                    <div class="text-center">
+                        <a href="https://www.pushbullet.com/#settings/account" target="_blank">Generar token</a>
+                    </div>
                     <label class="block text-xs font-semibold text-[var(--text-primary)]">Token de acceso
                         personal</label>
                     <input v-model="manualToken" type="password" placeholder="o.xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
