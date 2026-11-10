@@ -13,7 +13,7 @@ const crxPlugin = crx({
   manifest: {
     manifest_version: 3,
     name: 'Pushbullet by sarman',
-    version: '1.0.0',
+    version: '1.1.0',
     description: 'Extensión creada con Vue 3 y Vite para pushbullet',
     icons: icons,
     action: {
