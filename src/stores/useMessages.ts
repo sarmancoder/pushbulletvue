@@ -54,8 +54,13 @@ export const useMessagesStore = defineStore('counter', () => {
             }
             const _messages = (data.pushes.map(mapPushesToMessage)).sort((a, b) => a.timestamp - b.timestamp);
             if (timestamp > 0) {
-                // Introducir mensaje que llego
-                messages.value = [...messages.value, ..._messages]
+                chrome.notifications.create({
+                    type: 'basic',
+                    iconUrl: 'icons/icon128.png',
+                    title: 'Pushbullet by sarman',
+                    message: _messages.length > 0 ? 'Nuevas actualizaciones' : _messages[0].type == 'file' ? 'Nuevo archivo' : 'Nuevo mensaje',
+                    priority: 2
+                });
             } else {
                 // Paginación
                 messages.value = [..._messages, ...messages.value]

@@ -15,7 +15,8 @@ const crxPlugin = crx({
     },
     permissions: [
       'storage',
-      'tabs'
+      'tabs',
+      "notifications"
     ]
   }
 })
