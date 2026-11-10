@@ -54,7 +54,7 @@ export const useMessagesStore = defineStore('counter', () => {
             }
             const _messages = (data.pushes.map(mapPushesToMessage)).sort((a, b) => a.timestamp - b.timestamp);
             if (timestamp > 0) {
-                chrome.notifications.create({
+                (window as any).chrome.notifications.create({
                     type: 'basic',
                     iconUrl: 'icons/icon128.png',
                     title: 'Pushbullet by sarman',
