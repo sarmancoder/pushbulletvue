@@ -1,5 +1,7 @@
+import { API_ADDRESS } from "../vars"
+
 export default class PushbulletApi {
-    private BASE_URL = "https://api.pushbullet.com/v2"
+    private BASE_URL = API_ADDRESS
     protected token: string
 
     constructor(token: string) {
