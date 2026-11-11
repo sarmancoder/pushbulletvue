@@ -110,6 +110,7 @@ import { ref } from 'vue'
 import { useMessagesStore } from '../stores/useMessages';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
+import { WEB_ADDRESS } from '../vars';
 
 const router = useRouter()
 const route = useRoute()
@@ -119,31 +120,65 @@ const { appToken } = storeToRefs(useMessagesStore())
 const activeTab = ref<'manual' | 'oauth'>('manual')
 const manualToken = ref('')
 
+function setTokenAndRedirect(token: string) {
+    appToken.value = token
+    // Volvemos a la ruta que originó el login (por ejemplo /popup) o a la principal
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
+    router.push(redirect)
+}
+
 // Lógica de guardado del token manual
 const saveManualToken = () => {
     if (!manualToken.value.trim()) {
         alert('Por favor, introduce un token válido.')
         return
     }
-    appToken.value = manualToken.value.trim()
-    // Volvemos a la ruta que originó el login (por ejemplo /popup) o a la principal
-    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
-    router.push(redirect)
+    setTokenAndRedirect(manualToken.value.trim())
 }
 
 // Lógica de redirección a OAuth2 de Pushbullet
-const startOAuth = () => {
+const startOAuth = async () => {
     const params = new URLSearchParams({
-        client_id: '2XB7HT0nMjXPzNea96sVsRlU108Mi5VL', // 👈 Corregido a client_id
-        redirect_uri: 'http://localhost:5173/authenticate', // 👈 Asegúrate de que en Pushbullet esté exactamente igual
+        client_id: '',
+        redirect_uri: WEB_ADDRESS + '/login-success',
         response_type: 'token'
     })
 
-    const authUrl = `https://www.pushbullet.com/authorize?${params.toString()}`
+    const authUrl = WEB_ADDRESS + `/authorize?${params.toString()}`
 
-    console.log(authUrl)
+    console.log('abriendo popup auth')
 
-    window.location.href = authUrl // Ya puedes descomentarlo cuando quieras probarlo
+    const token = await requestToken(authUrl)
+    console.log('Token obtenido ' + token)
+    setTokenAndRedirect(token)
+}
+
+function requestToken(authUrl: string) {
+    return new Promise<string>((resolve, reject) => {
+        chrome.windows.create({
+            url: authUrl,
+            type: 'popup',
+            width: 600,
+            height: 700
+        })
+        console.log('..abierto')
+
+        chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+            if (changeInfo.status === 'complete' && tab.url && tab.url.startsWith('https://www.pushbullet.com/login-success')) {
+                const urlHash = tab.url.split('#')[1]
+                if (urlHash) {
+                    const urlParams = new URLSearchParams(urlHash)
+                    const accessToken = urlParams.get('access_token')
+
+                    if (accessToken) {
+                        resolve(accessToken)
+                    } else {
+                        reject(new Error('No se obtuvo el token'))
+                    }
+                }
+            }
+        })
+    })
 }
 </script>
 
