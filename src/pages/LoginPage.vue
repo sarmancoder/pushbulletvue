@@ -161,9 +161,7 @@ function requestToken(authUrl: string) {
             width: 600,
             height: 700
         })
-        console.log('..abierto')
-
-        chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+        chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
             if (changeInfo.status === 'complete' && tab.url && tab.url.startsWith('https://www.pushbullet.com/login-success')) {
                 const urlHash = tab.url.split('#')[1]
                 if (urlHash) {
