@@ -71,7 +71,7 @@ export const useMessagesStore = defineStore('counter', () => {
                 chrome.notifications.onClicked.addListener((clickedId) => {
                     if (clickedId === notificationId) {
                         chrome.tabs.create({
-                            url: chrome.runtime.getURL('index.html#/')
+                            url: _messages[0].type == 'link' ? _messages[0].text : chrome.runtime.getURL('index.html#/')
                         })
                     }
                 });
