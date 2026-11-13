@@ -107,7 +107,7 @@ useIntersectionObserver(
 
     /* Wrapper del listado */
     .messages-list {
-        @apply flex flex-col gap-1;
+        @apply flex flex-col gap-2;
     }
 
     /* Estado vacío */

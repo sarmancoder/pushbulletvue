@@ -56,7 +56,6 @@ const isUrl = computed(() => props.message.startsWith('http'))
         <div :class="['message-bubble', isMe ? 'message-bubble-me' : 'message-bubble-other']">
             <div class="message-header">
                 <span class="message-sender">{{ isMe ? 'Tú' : sender }}</span>
-                <span class="message-time">{{ new Date(timestamp * 1000).toLocaleString() }}</span>
             </div>
 
             <strong v-if="title" class="text-xl">
@@ -70,6 +69,7 @@ const isUrl = computed(() => props.message.startsWith('http'))
             <p class="message-text" v-else>
                 {{ message ?? timestamp }}
             </p>
+            <p class="message-time text-right">{{ new Date(timestamp * 1000).toLocaleTimeString() }}</p>
         </div>
     </div>
 </template>
@@ -77,11 +77,16 @@ const isUrl = computed(() => props.message.startsWith('http'))
 <style scoped>
 @import 'tailwindcss';
 
+.message-wrapper-other+.message-wrapper-other .message-sender,
+.message-wrapper-me+.message-wrapper-me .message-sender {
+    display: none;
+}
+
 @layer components {
 
     /* Contenedor principal del mensaje */
     .message-wrapper {
-        @apply flex items-end gap-3 my-3 w-full min-w-0;
+        @apply flex items-end gap-3 w-full min-w-0;
     }
 
     .message-wrapper-me {
