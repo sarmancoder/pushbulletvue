@@ -13,7 +13,7 @@ const crxPlugin = crx({
   manifest: {
     manifest_version: 3,
     name: 'Pushbullet by sarman',
-    version: '1.1.1',
+    version: '1.1.2',
     key: 'ehkkonnnnkiodldmojedkjechpoanllb',
     description: 'Extensión creada con Vue 3 y Vite para pushbullet',
     icons: icons,
@@ -21,10 +21,13 @@ const crxPlugin = crx({
       default_popup: 'index.html#/popup',
       default_icon: icons
     },
+    host_permissions: [
+      "https://www.pushbullet.com/*"
+    ],
     permissions: [
       "tabs",
-      "notifications",
-      'identity'
+      "scripting",
+      "notifications"
     ]
   }
 })

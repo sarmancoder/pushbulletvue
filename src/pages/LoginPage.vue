@@ -98,6 +98,16 @@
                         </svg>
                         Conectar con Pushbullet (OAuth2)
                     </button>
+                    <button @click="extractKey"
+                        class="w-full py-2.5 rounded-xl bg-[var(--bg-tertiary)] hover:bg-[var(--border-color)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4 text-[var(--text-primary)]" fill="none" stroke="currentColor"
+                            stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15 7h2a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2h2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v2m-6 0h6">
+                            </path>
+                        </svg>
+                        Extraer api key
+                    </button>
                 </div>
             </div>
 
@@ -110,7 +120,7 @@ import { ref } from 'vue'
 import { useMessagesStore } from '../stores/useMessages';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
-import { WEB_ADDRESS } from '../vars';
+import { BASE_HOST_NAME, CLIENT_ID, WEB_ADDRESS } from '../vars';
 
 const router = useRouter()
 const route = useRoute()
@@ -136,10 +146,54 @@ const saveManualToken = () => {
     setTokenAndRedirect(manualToken.value.trim())
 }
 
+const extractKey = async () => {
+    const token = await extractTokenKeyFromPage()
+    if (!token) return
+    setTokenAndRedirect(token)
+}
+
+const extractTokenKeyFromPage = async () => {
+    const windowPushbullet = await chrome.windows.create({
+        url: 'https://www.' + BASE_HOST_NAME,
+        type: 'popup',
+        width: 500,
+        height: 700
+    })
+
+    if (!windowPushbullet || !windowPushbullet.tabs) return
+
+    const tabId = windowPushbullet.tabs[0].id
+
+    if (!tabId) return
+
+    await new Promise((r) => setTimeout(r, 500))
+
+    do {
+        const scriptRes = await chrome.scripting.executeScript({
+            target: { tabId: tabId },
+            func: () => {
+                const account = localStorage.getItem('account')
+                console.log('Holaaa', account)
+                // alert(account)
+                return account
+            }
+        })
+
+        const account = scriptRes[0].result
+
+        if (account) {
+            await chrome.tabs.remove(tabId)
+            return JSON.parse(account).api_key
+        }
+        await new Promise((r) => setTimeout(r, 500))
+    } while (true)
+
+}
+
 // Lógica de redirección a OAuth2 de Pushbullet
 const startOAuth = async () => {
     const params = new URLSearchParams({
-        client_id: '',
+        client_id: CLIENT_ID,
         redirect_uri: WEB_ADDRESS + '/login-success',
         response_type: 'token'
     })
@@ -149,7 +203,6 @@ const startOAuth = async () => {
     console.log('abriendo popup auth')
 
     const token = await requestToken(authUrl)
-    console.log('Token obtenido ' + token)
     setTokenAndRedirect(token)
 }
 

@@ -45,7 +45,7 @@ const isUrl = computed(() => props.message.startsWith('http'))
 
         <!-- Avatar o indicador de usuario -->
         <div class="message-avatar">
-            {{ sender.charAt(0).toUpperCase() }}
+            {{ sender?.charAt(0).toUpperCase() }}
         </div>
 
         <!-- Burbuja del mensaje -->
