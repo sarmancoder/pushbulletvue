@@ -16,6 +16,7 @@ export type PusherType = {
     receiver_email_normalized: string;
     source_device_iden: string;
     awake_app_guids: string[];
+    title: string;
     body: string;
     url: string;
     file_url: string;

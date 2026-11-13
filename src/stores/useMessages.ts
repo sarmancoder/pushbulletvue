@@ -10,6 +10,7 @@ type Message = {
     sender: string;
     text: string;
     timestamp: number;
+    title: string,
     isMe: boolean;
     type: 'note' | 'link' | 'file'
 }
@@ -19,6 +20,7 @@ const mapPushesToMessage = (x: PusherType) => ({
     text: x.type === 'note' ? x.body : x.type === 'link' ? x.url : x.file_url,
     sender: x.sender_name,
     timestamp: x.created,
+    title: x.title,
     isMe: !x.source_device_iden,
     type: x.type
 } as Message)
@@ -110,7 +112,7 @@ export const useMessagesStore = defineStore('counter', () => {
         firstScrolled.value = true
     })
 
-    async function pushFiles(message: string, files: File[]) {
+    async function pushFiles({ message, title }: { message: string, title: string }, files: File[]) {
         const apiPusher = await PushbulletApiPusher.getInstance({ token: appToken.value })
         const apiFile = PushbulletApiFile.getInstance({ token: appToken.value })
         for (const element of files) {
@@ -121,6 +123,7 @@ export const useMessagesStore = defineStore('counter', () => {
             const result = await apiFile.uploadRequest(file, element)
             await apiPusher.postPush({
                 body: message,
+                title: title,
                 type: 'file',
                 ...file,
                 file_url: result.file_url
@@ -128,13 +131,14 @@ export const useMessagesStore = defineStore('counter', () => {
         }
     }
 
-    async function pushMessage(message: string) {
+    async function pushMessage({ message, title }: { message: string, title: string }) {
         if (!appToken.value) return
 
         const apiPusher = await PushbulletApiPusher.getInstance({ token: appToken.value })
 
         const data = await apiPusher.postPush({
             body: message,
+            title: title,
             type: 'note',
         })
 
@@ -143,6 +147,7 @@ export const useMessagesStore = defineStore('counter', () => {
             text: data.type === 'note' ? data.body : data.type === 'link' ? data.url : data.file_url,
             sender: data.sender_name,
             timestamp: data.created,
+            title: data.title,
             isMe: !data.source_device_iden,
             type: data.type
         }]

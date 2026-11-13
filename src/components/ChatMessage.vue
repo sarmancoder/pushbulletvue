@@ -11,6 +11,10 @@ const props = defineProps({
         type: String,
         required: true
     },
+    title: {
+        type: String,
+        default: ''
+    },
     timestamp: {
         type: Number,
         default: 0
@@ -55,6 +59,9 @@ const isUrl = computed(() => props.message.startsWith('http'))
                 <span class="message-time">{{ new Date(timestamp * 1000).toLocaleString() }}</span>
             </div>
 
+            <strong v-if="title" class="text-xl">
+                {{ title }}
+            </strong>
             <img v-if="isImage" :src="message" class="max-w-sm" />
             <video v-else-if="isVideo" :src="message" class="max-w-sm" controls />
             <a v-else-if="isUrl" target="_blank" class="text-blue-800" :href="message">

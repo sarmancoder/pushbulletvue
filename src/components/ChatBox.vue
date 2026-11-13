@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { useMessagesStore } from '../stores/useMessages';
 const errorMessage = ref('')
 const message = ref('')
+const title = ref('')
 const unable = ref(false)
 const isDragging = ref(false)
 const filesLoaded = ref<File[]>([])
@@ -52,10 +53,14 @@ async function sendMessage() {
         }
         errorMessage.value = ''
         unable.value = true
-        console.log(`cargando ${filesLoaded.value.length} archivos`)
-        if (filesLoaded.value.length > 0) await pushFiles(message.value, filesLoaded.value)
-        else await pushMessage(message.value)
+        const push = {
+            message: message.value,
+            title: title.value
+        }
+        if (filesLoaded.value.length > 0) await pushFiles(push, filesLoaded.value)
+        else await pushMessage(push)
         message.value = ""
+        title.value = ''
         filesLoaded.value = []
         imagesLoaded.value = []
     } catch (error: any) {
@@ -82,8 +87,12 @@ async function sendMessage() {
                         <img v-for="(src, index) in imagesLoaded" :key="index" :src="src" width="200" />
                     </div>
                     <div class="flex flex-row items-center gap-2 p-2 sm:p-2.5">
-                        <input :readonly="unable" placeholder="Escribe aquí tu mensaje..." v-model="message"
-                            class="flex-1" />
+                        <div class="flex flex-col space-y-2 w-full">
+                            <input :readonly="unable" placeholder="Título de mensaje..." v-model="title"
+                                class="flex-1" />
+                            <input :readonly="unable" placeholder="Escribe aquí tu mensaje..." v-model="message"
+                                class="flex-1" />
+                        </div>
                         <button :disabled="unable" type="submit" class="shrink-0 px-5">Enviar</button>
                     </div>
                 </div>

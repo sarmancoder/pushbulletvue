@@ -74,7 +74,7 @@ useIntersectionObserver(
         <!-- Lista de mensajes -->
         <div v-else class="messages-list">
             <ChatMessage v-for="msg in messages" :key="msg.id" :sender="msg.sender" :message="msg.text" :msg_full="msg"
-                :timestamp="msg.timestamp" :is-me="msg.isMe" />
+                :title="msg.title" :timestamp="msg.timestamp" :is-me="msg.isMe" />
         </div>
 
     </div>
