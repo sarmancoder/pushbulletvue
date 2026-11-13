@@ -60,12 +60,20 @@ export const useMessagesStore = defineStore('counter', () => {
 
             const _messages = (msgs.map(mapPushesToMessage)).sort((a, b) => a.timestamp - b.timestamp);
             if (timestamp > 0) {
-                (window as any).chrome.notifications.create({
+                var notificationId = 'pushbullet_notification_' + Date.now();
+                chrome.notifications.create(notificationId, {
                     type: 'basic',
                     iconUrl: 'icons/icon128.png',
                     title: 'Pushbullet by sarman',
                     message: _messages.length > 1 ? 'Nuevas actualizaciones' : _messages[0].type == 'file' ? 'Nuevo archivo' : _messages[0].text,
                     priority: 2
+                });
+                chrome.notifications.onClicked.addListener((clickedId) => {
+                    if (clickedId === notificationId) {
+                        chrome.tabs.create({
+                            url: chrome.runtime.getURL('index.html#/')
+                        })
+                    }
                 });
                 messages.value = [...messages.value, ..._messages]
             } else {
