@@ -11,6 +11,10 @@ const props = defineProps({
         type: String,
         required: true
     },
+    body: {
+        type: String,
+        required: true,
+    },
     title: {
         type: String,
         default: ''
@@ -68,6 +72,10 @@ const isUrl = computed(() => props.message.startsWith('http'))
             </a>
             <p class="message-text" v-else>
                 {{ message ?? timestamp }}
+            </p>
+
+            <p v-if="isImage || isVideo">
+                {{ body }}
             </p>
             <p class="message-time text-right">{{ new Date(timestamp * 1000).toLocaleTimeString() }}</p>
         </div>

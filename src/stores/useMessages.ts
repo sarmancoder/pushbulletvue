@@ -11,6 +11,7 @@ type Message = {
     text: string;
     timestamp: number;
     title: string,
+    body: string,
     isMe: boolean;
     type: 'note' | 'link' | 'file'
 }
@@ -20,6 +21,7 @@ const mapPushesToMessage = (x: PusherType) => ({
     text: x.type === 'note' ? x.body : x.type === 'link' ? x.url : x.file_url,
     sender: x.sender_name,
     timestamp: x.created,
+    body: x.body,
     title: x.title,
     isMe: !x.source_device_iden,
     type: x.type
@@ -145,6 +147,7 @@ export const useMessagesStore = defineStore('counter', () => {
         messages.value = [...messages.value, {
             id: data.iden,
             text: data.type === 'note' ? data.body : data.type === 'link' ? data.url : data.file_url,
+            body: data.body,
             sender: data.sender_name,
             timestamp: data.created,
             title: data.title,
